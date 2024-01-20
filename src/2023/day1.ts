@@ -10,20 +10,29 @@ function sumAllCalibrationValues() {
     )
 }
 
+
+const numberWordsToInts: {[index: string]:number} = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9 }
+const matchRegex = /one|two|three|four|five|six|seven|eight|nine|1|2|3|4|5|6|7|8|9/g
+
+function convertMatchToNumber(matchArray: RegExpMatchArray) {
+    let matchedText = matchArray[0];
+    return numberWordsToInts[matchedText] ?? parseInt(matchedText);
+}
+
 function extractCalibrationValueFromLine(line: string) {
-    let numberMatches = [...line.matchAll(/\d/g)];
+    let numberMatches = [...line.matchAll(matchRegex)];
     assert(numberMatches.length, 'No numbers in line');
 
     let firstMatch = numberMatches[0];
     let lastMatch = numberMatches[numberMatches.length-1];
 
-    let valueStr = firstMatch[0] + lastMatch[0];
-    let value = parseInt(valueStr);
+    let valueStr = `${convertMatchToNumber(firstMatch)}${convertMatchToNumber(lastMatch)}`;
+    let value = parseInt(valueStr)
     return value;
 }
 
 function extractCalibrationValueFromLineIterable(line: string) {
-    let numberMatches = line.matchAll(/\d/g);
+    let numberMatches = line.matchAll(matchRegex);
     let firstMatch, lastMatch;
 
     firstMatch = lastMatch = numberMatches.next().value;
@@ -32,8 +41,8 @@ function extractCalibrationValueFromLineIterable(line: string) {
         lastMatch = match;
     }
 
-    let valueStr = firstMatch[0] + lastMatch[0];
-    let value = parseInt(valueStr);
+    let valueStr = `${convertMatchToNumber(firstMatch)}${convertMatchToNumber(lastMatch)}`;
+    let value = parseInt(valueStr)
     return value;
 }
 

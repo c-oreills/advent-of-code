@@ -37,8 +37,8 @@ function extractCalibrationValueFromLineIterable(line: string) {
     return value;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (!module?.parent) {
     console.log(sumAllCalibrationValues())
 }
 
-//module.exports = { extractCalibrationValueFromLine, extractCalibrationValueFromLineIterable }
+module.exports = { extractCalibrationValueFromLine, extractCalibrationValueFromLineIterable }

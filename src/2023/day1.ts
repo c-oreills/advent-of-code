@@ -12,10 +12,15 @@ function sumAllCalibrationValues() {
 
 
 const numberWordsToInts: {[index: string]:number} = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9 }
-const matchRegex = /one|two|three|four|five|six|seven|eight|nine|1|2|3|4|5|6|7|8|9/g
+
+// Use lookahead and matching groups as per https://stackoverflow.com/questions/20833295/how-can-i-match-overlapping-strings-with-regex/33903830#33903830
+const matchRegex = /(?=(one|two|three|four|five|six|seven|eight|nine|1|2|3|4|5|6|7|8|9))/g
 
 function convertMatchToNumber(matchArray: RegExpMatchArray) {
-    let matchedText = matchArray[0];
+    // the first element of the match array will be an empty string due to the
+    // lookahead, need to use the second element to get the matched text via the
+    // matching groups
+    let matchedText = matchArray[1];
     return numberWordsToInts[matchedText] ?? parseInt(matchedText);
 }
 

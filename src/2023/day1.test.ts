@@ -28,6 +28,9 @@ test('error on lines without numbers (iterable)', () => {
 test('extract calibration values with multiple numbers, including words', () => {
     expect(day1.extractCalibrationValueFromLine('ninea1b2c3deight')).toBe(98);
 })
+test('extract calibration values with multiple numbers, including blended words', () => {
+    expect(day1.extractCalibrationValueFromLine('3twone')).toBe(31);
+})
 test('extract calibration values with a single number, including words', () => {
     expect(day1.extractCalibrationValueFromLine('aoneb')).toBe(11);
 })

@@ -2,6 +2,12 @@ import { readFileSync } from 'fs';
 
 const lines = readFileSync('src/2023/inputs/2.txt', 'utf8').split('\n');
 
+type Set = {
+    red?: number,
+    green?: number,
+    blue?: number
+}
+
 function sumAllValidGameIds() {
     return lines.reduce(
         function (accumulator, line) { 
@@ -20,7 +26,7 @@ function sumAllGamePowers () {
     )
 }
 
-const maxAllowedCubes: {[index: string]:number} = {red: 12, green: 13, blue: 14}
+const maxAllowedCubes = {red: 12, green: 13, blue: 14}
 
 function parseGame(line: string) {
     let [gameIdStr, setsStr] = line.split(': ');
@@ -28,9 +34,9 @@ function parseGame(line: string) {
     let sets = [];
 
     for (let setStr of setsStr.split('; ')) {
-        let set: {[index: string]:number} = {};
+        let set: Set = {};
         for (let cubesStr of setStr.split(', ')) {
-            let [countStr, colour] = cubesStr.split(' ');
+            let [countStr, colour] = cubesStr.split(' ') as [string, keyof Set];
             let count = parseInt(countStr);
             set[colour] = count;
         }
@@ -44,7 +50,7 @@ function extractGameIdAndValidity(line: string): [number, boolean] {
     let game = parseGame(line);
 
     for (let set of game.sets) {
-        for (let [colour, count] of Object.entries(set)) {
+        for (let [colour, count] of Object.entries(set) as [keyof Set, number][]) {
             if (count > maxAllowedCubes[colour]) {
                 return [game.id, false]
             }
@@ -56,10 +62,10 @@ function extractGameIdAndValidity(line: string): [number, boolean] {
 
 function extractGamePower(line: string): number {
     let game = parseGame(line);
-    let minimumCubes: { [index: string]: number } = {};
+    let minimumCubes: Set = {};
 
     for (let set of game.sets) {
-        for (let [colour, count] of Object.entries(set)) {
+        for (let [colour, count] of Object.entries(set) as [keyof Set, number][]) {
             if (count > (minimumCubes[colour] || 0)) {
                 minimumCubes[colour] = count;
             }

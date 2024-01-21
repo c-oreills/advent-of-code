@@ -12,27 +12,71 @@ function sumAllValidGameIds() {
     )
 }
 
+function sumAllGamePowers () {
+    return lines.reduce(
+        (accumulator, line) =>
+            accumulator + extractGamePower(line),
+        0
+    )
+}
+
 const maxAllowedCubes: {[index: string]:number} = {red: 12, green: 13, blue: 14}
 
-function extractGameIdAndValidity(line: string): [number, boolean] {
+function parseGame(line: string) {
     let [gameIdStr, setsStr] = line.split(': ');
     let gameId = parseInt(gameIdStr.split(' ')[1]);
+    let sets = [];
 
     for (let setStr of setsStr.split('; ')) {
+        let set: {[index: string]:number} = {};
         for (let cubesStr of setStr.split(', ')) {
-            let [numberStr, colour] = cubesStr.split(' ');
-            let number = parseInt(numberStr);
-            if (number > maxAllowedCubes[colour]) {
-                return [gameId, false]
+            let [countStr, colour] = cubesStr.split(' ');
+            let count = parseInt(countStr);
+            set[colour] = count;
+        }
+        sets.push(set);
+    }
+
+    return {id: gameId, sets}
+}
+
+function extractGameIdAndValidity(line: string): [number, boolean] {
+    let game = parseGame(line);
+
+    for (let set of game.sets) {
+        for (let [colour, count] of Object.entries(set)) {
+            if (count > maxAllowedCubes[colour]) {
+                return [game.id, false]
             }
         }
     }
 
-    return [gameId, true]
+    return [game.id, true]
+}
+
+function extractGamePower(line: string): number {
+    let game = parseGame(line);
+    let minimumCubes: { [index: string]: number } = {};
+
+    for (let set of game.sets) {
+        for (let [colour, count] of Object.entries(set)) {
+            if (count > (minimumCubes[colour] || 0)) {
+                minimumCubes[colour] = count;
+            }
+        }
+    }
+
+    let counts = Object.values(minimumCubes)
+    // For games which don't specify all colours, product should be zero
+    if (counts.length < 3) {
+        return 0;
+    }
+    return counts.reduce((product, count) => product * count, 1)
 }
 
 if (!module?.parent) {
     console.log(sumAllValidGameIds())
+    console.log(sumAllGamePowers())
 }
 
-module.exports = { extractGameIdAndValidity }
+module.exports = { extractGameIdAndValidity, extractGamePower }

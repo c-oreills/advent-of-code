@@ -4,6 +4,17 @@ const day2 = require('./day2');
 test('Valid game', () => {
     expect(day2.extractGameIdAndValidity('Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green')).toEqual([1, true]);
 })
+
 test('Invalid game', () => {
     expect(day2.extractGameIdAndValidity('Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red')).toEqual([3, false]);
+})
+
+
+// Part 2
+test('Product of non-zero game', () => {
+    expect(day2.extractGamePower('Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green')).toEqual(48);
+})
+
+test('Product of non-zero game', () => {
+    expect(day2.extractGamePower('Game 1: 3 blue, 4 red; 1 red, 6 blue')).toEqual(0);
 })

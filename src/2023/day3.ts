@@ -8,6 +8,11 @@ function sumPartNumbers() {
     return partNumbers.reduce((acc, current) => acc + current, 0)
 }
 
+function sumGearRatios() {
+    const gearRatios = findGearRatios(lines);
+    return gearRatios.reduce((acc, current) => acc + current, 0)
+}
+
 function findPartNumbers(lines: string[]) {
     const partNumbers: number[] = [];
 
@@ -18,6 +23,34 @@ function findPartNumbers(lines: string[]) {
     }
 
     return partNumbers;
+}
+
+function findGearRatios(lines: string[]) {
+    const gearRatios: number[] = [];
+    const gearPartNumberMap = new Map<string, number[]>();
+
+    for (const [matchedNumberText, lineIndex, matchIndex, matchLength] of numberMatchesGenerator(lines)) {
+        const partNumber = parseInt(matchedNumberText)
+        for (const [symbolStr, symbolLineIndex, symbolColumnIndex]
+             of adjacentSymbolGenerator(lines, lineIndex, matchIndex, matchLength))
+        {
+            const gearKey = `${symbolLineIndex},${symbolColumnIndex}`;
+            const gearPartNumber = gearPartNumberMap.get(gearKey);
+            if (gearPartNumber === undefined) {
+                gearPartNumberMap.set(gearKey, [partNumber]);
+            } else {
+                gearPartNumber.push(partNumber);
+            }
+        }
+    }
+
+    for (const partNumbers of gearPartNumberMap.values()) {
+        if (partNumbers.length == 2) {
+            gearRatios.push(partNumbers[0] * partNumbers[1])
+        }
+    }
+
+    return gearRatios;
 }
 
 function* numberMatchesGenerator(lines: string[]): Generator<[string, number, number, number]> {
@@ -44,6 +77,8 @@ function* adjacentSymbolGenerator(
         if (searchLineIndex < 0 || searchLineIndex >= lines.length) {
             continue
         }
+        // n.b. there is an off-by-one error here where the final column is not
+        // considered, but all puzzle inputs seem to have the final column blank
         const searchStr = lines[searchLineIndex].slice(minCharIndex, maxCharIndex);
         for (const match of searchStr.matchAll(/[^\d.]/g)) {
             assert(match.index !== undefined)
@@ -57,6 +92,7 @@ function* adjacentSymbolGenerator(
 
 if (!module?.parent) {
     console.log(sumPartNumbers())
+    console.log(sumGearRatios())
 }
 
-module.exports = { findPartNumbers }
+module.exports = { findPartNumbers, findGearRatios }

@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import assert from 'node:assert/strict';
 
 const lines = readFileSync('src/2023/inputs/3.txt', 'utf8').split('\n');
 
@@ -10,6 +11,16 @@ function sumPartNumbers() {
 function findPartNumbers(lines: string[]) {
     let partNumbers: number[] = [];
 
+    for (let [matchedText, lineIndex, matchIndex, matchLength] of numberMatchesGenerator(lines)) {
+        if (!adjacentSymbolGenerator(lines, lineIndex, matchIndex, matchLength).next().done) {
+            partNumbers.push(parseInt(matchedText))
+        }
+    }
+
+    return partNumbers;
+}
+
+function* numberMatchesGenerator(lines: string[]): Generator<[string, number, number, number]> {
     for (let [lineIndex, line] of lines.entries()) {
         let numberMatches = [...line.matchAll(/\d+/g)]
         for (let numberMatch of numberMatches) {
@@ -17,16 +28,15 @@ function findPartNumbers(lines: string[]) {
             let matchIndex = numberMatch.index as number;
             let matchLength = matchedText.length;
 
-            if (isSymbolAdjacent(lines, lineIndex, matchIndex, matchLength)) {
-                partNumbers.push(parseInt(matchedText))
-            }
+            yield [matchedText, lineIndex, matchIndex, matchLength]
         }
     }
-
-    return partNumbers;
 }
 
-function isSymbolAdjacent(lines: string[], lineIndex: number, matchIndex: number, matchLength: number): boolean {
+function* adjacentSymbolGenerator(
+    lines: string[], lineIndex: number, matchIndex: number,
+    matchLength: number
+): Generator<[string, number, number]> {
     let minCharIndex = Math.max(matchIndex - 1, 0)
     let maxCharIndex = Math.min(matchIndex + matchLength + 1, lines[0].length - 1);
 
@@ -35,11 +45,14 @@ function isSymbolAdjacent(lines: string[], lineIndex: number, matchIndex: number
             continue
         }
         let searchStr = lines[searchLineIndex].slice(minCharIndex, maxCharIndex);
-        if (searchStr.search(/[^\d.]/) > -1) {
-            return true;
+        for (let match of searchStr.matchAll(/[^\d.]/g)) {
+            assert(match.index !== undefined)
+
+            let matchedText = match[0];
+            let columnIndex = minCharIndex + match.index;
+            yield [matchedText, searchLineIndex, columnIndex];
         }
     }
-    return false
 }
 
 if (!module?.parent) {
